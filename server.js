@@ -1,12 +1,60 @@
-const express = require('express');
-const app = express()
-const config = require('dotenv').config()
+const express = require("express");
+// const bodyparser = require('body-parser')
+const app = express();
+const config = require("dotenv").config();
+const port = process.env.PORT || 8001;
+const mongoose = require("mongoose");
+const mongo_uri = process.env.MONGO_URL;
+const Product = require('./models/productModels');
+const cors = require('cors')
 
-app.get('/',(req, res)=>{
-    res.send("Hello Node API")
-})
+app.use(cors());
+app.use(express.json())
 
-app.listen(3000, ()=>{
-    console.log("Server listening to PORT : ", process.env.PORT)
-})
+
+// app.use(bodyparser.urlencoded({ extended: true }))
+// app.use(bodyparser.json())
+
+// Establishing connection with the MONGODB
+// Connecting SB using jS promise
+
+// mongoose.connect(mongo_uri)
+// .then(()=>{
+//     console.log("DB Connected successfully")
+// })
+// .catch((error)=>{
+//     console.log(error)
+// })
+
+// Connecting to Db using async await
+
+const connectToMongo = async () => {
+  try {
+    await mongoose.connect(mongo_uri).then(() => {
+      console.log("Connected To DB successfully...");
+      app.listen(port, () => {
+        console.log(`Server listening to PORT : ${port}`);
+      });
+    });
+  } catch (error) {
+    console.log("Error connecting to DB");
+  }
+};
+
+connectToMongo();
+
+
+// Create a product route
+app.post("/product", async (req, res) => {
+  try {
+    const product = await Product.create(req.body);
+    res.status(200).json(product);
+  } 
+  catch (error) {
+    console.log(error.message);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get All products route
 
